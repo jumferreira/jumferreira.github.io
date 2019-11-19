@@ -1,0 +1,118 @@
+.weather_list {
+    @apply
+        .flex
+        .flex-wrap
+        .h-full
+        .p-3
+        .mb-3;
+
+    &__title { @apply .mb-1; }
+
+    &__item,
+    &__repository {
+        @apply .w-full;
+    }
+
+    &__item {
+        @apply
+            .flex;
+
+        &__image,
+        &__info {
+            @apply .w-1/2;
+        }
+
+        &__image {
+            @apply
+                // .max-w-1/3
+                .mr-2;
+
+            img {
+                @apply .w-full;
+            }
+        }
+
+        &__info {
+            li {
+                @apply .my-2;
+            }
+        }
+
+        &__followers, &__following {
+            li {
+                @apply .ml-2;
+
+                a { @apply .underline; }
+            }
+        }
+    }
+
+    &__repository {
+        @apply
+            .p-3;
+
+        &__head {
+            @apply
+                .flex
+                .mb-1;
+
+            h3 {
+                @apply .flex-grow;
+            }
+        }
+
+        &__items {
+        }
+
+        &__item {
+            @apply
+                .flex
+                .my-1;
+
+            button {
+                @apply
+                    .flex-grow
+                    .text-left;
+            }
+        }
+    }
+
+    &__repo-detail {
+        @apply
+            .p-3;
+
+        h3 {
+            @apply .mb-1;
+        }
+
+        li {
+            @apply .my-1;
+        }
+    }
+}
+
+.empty-message {
+    @apply
+        .w-3/4
+        .p-1
+        .border
+        .border-dashed
+        .my-0 .mx-auto;
+}
+
+@screen md {
+    .weather_list {
+        &__item,
+        &__repository { @apply .w-1/2; }
+
+        &__item {
+            @apply
+                .border-r
+                .border-gray-600;
+        }
+    }
+}
+
+@screen lg {}
+
+@screen xl {}
