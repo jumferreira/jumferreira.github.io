@@ -14,11 +14,10 @@
                     <div class="column">
                         <div class="header__search">
                             <div class="header__search-holder">
-
                                 <input
                                     type="text"
                                     class="input input--grey-darker input--75"
-                                    placeholder="Busca por coordenadas"
+                                    placeholder="Busca por endereços"
                                     v-model="searchField"
                                     @keyup="search()"
                                 >
@@ -50,23 +49,77 @@
 
                         <!-- <div class="empty-message" v-if="isShowingInitialMessage && isEmptyResult"> -->
                         <!-- <div class="empty-message">
-                            <h3>Bem vindo ao painel de busca de coordenadas e tempo <i class="fab fa-github"></i></h3>
+                            <h3>Bem vindo ao painel de busca de endereços e tempo e temperatura <i class="fab fa-github"></i></h3>
 
                             <p>Para usar o buscador é muito simples!</p>
                             <br />
 
-                            <p>Você pode autorizar o navegador a usar sua localização ou então digitar sua latitude e longitude (nessa ordem) e a previsão do tempo já vai aparecer bem aqui. Viu como é simples?</p>
+                            <p>Você pode autorizar o navegador a usar sua localização ou então digitar seu endereço e a previsão do tempo já vai aparecer bem aqui. Viu como é simples?</p>
                         </div> -->
 
                         <!--
+                            TODO:
                             - SALVAR HISTÓRICO DE BUSCA EM UM ARRAY
                             - CRIAR BUSCA OTIMIZADA COM ESSE ARRAY
-                            - PEGAR TEMPERATURA PELA LOCALIZAÇÃO
                             - CACHEAR ESSES DADOS
 
                         -->
-                        <div class="weather_list">
-                            ajsjashjash
+                        <div class="content">
+                            <div class="content__left">
+                                <div class="location">
+                                    <strong>Sua localização atual é:</strong>
+                                    <p>Rua Raposo Tavares, 9-72 - Bauru - São Paulo</p>
+                                    <!-- colocar endereço -->
+                                </div>
+
+                                <div class="location_history">
+                                    Histórico de busca:
+
+                                    <ul>
+                                        <li>Rua Péricles Fechio, 54</li>
+                                    </ul>
+                                    <!-- fazer v-for com histórico -->
+                                </div>
+                            </div>
+
+                            <div class="content__right">
+                                <div class="weather">
+                                    <p class="weather__title">As informações do clima no momento:</p>
+
+                                    <div class="weather__box">
+                                        <div class="weather__box-header">
+                                            <p v-text="weatherData.cityName"></p>
+                                            <p v-text="weatherData.title"></p>
+                                        </div>
+
+                                        <div class="weather__box-body">
+                                            <div class="weather__box-body_left">
+                                                <img :src="iconUrl" alt="weather">
+                                                <p>
+                                                    {{ aroundTemperature(weatherData.temp) + '°C' }}
+                                                </p>
+                                            </div>
+
+                                            <div class="weather__box-body_right">
+                                                <p>Chuva: {{ weatherData.rain }}%</p>
+                                                <p>Umidade: {{ weatherData.humidity }}%</p>
+                                                <p>Vento: {{ windSpeedParsed }}km/h</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="weather__box-next-days">
+                                            <ul class="weather__items">
+                                                <li class="weather__item">
+                                                    <p>dia</p>
+                                                    <p>icon</p>
+                                                    <p>max/min</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -80,15 +133,40 @@
 
 export default {
     data: () => ({
-        userLocation: {
-            latitude: 0,
-            longitude: 0,
-            altitude: 0,
-            accuracy: 0,
-            altitudeAccuracy: 0,
-            heading: 0,
-            speed: 0,
-            timestamp: 0,
+        // userLocation: {
+        //     latitude: 0,
+        //     longitude: 0,
+            // altitude: 0,
+            // accuracy: 0,
+            // altitudeAccuracy: 0,
+            // heading: 0,
+            // speed: 0,
+            // timestamp: 0,
+        // },
+
+        weatherData: {
+            cityName:"Bauru",
+            clouds:0,
+            humidity:78,
+            icon:"01n",
+            maxTemp:22.22,
+            minTemp:22.22,
+            rain: 0,
+            temp:22.22,
+            title:"Clear",
+            windSpeed:4.47,
+
+
+            // title: null,
+            // temp: 0,
+            // maxTemp: 0,
+            // minTemp: 0,
+            // humidity: 0,
+            // windSpeed: 0,
+            // rain: 0,
+            // clouds: 0,
+            // cityName: null,
+            // icon: null,
         },
 
         isLoading: false,
@@ -97,60 +175,116 @@ export default {
         searchHistory: [],
     }),
 
-    // computed: {
-    //
-    // },
+    computed: {
+        iconUrl () {
+            return `https://openweathermap.org/img/wn/${this.weatherData.icon}@2x.png`;
+        },
+
+        windSpeedParsed () {
+            return Math.round(this.weatherData.windSpeed * 3.6);
+        },
+    },
 
     methods: {
-        // api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}
+        async getWeather (latitude, longitude) {
 
-        async getWeather () {
-            const latitude = this.userLocation.latitude;
-            const longitude = this.userLocation.longitude;
-            let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=b077652524e83bc12498a0846b5f135d`);
-            // let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${this.userLocation.latitude}&lon=${this.userLocation.longitude}&appid=b077652524e83bc12498a0846b5f135d`);
+            // certo
+            // let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=b077652524e83bc12498a0846b5f135d`);
 
-            console.log(data);
+            // console.log('getWeather: ', data);
+            // this.weatherData.cityName = data.name;
+            // this.weatherData.title = data.weather[0].main;
+            // this.weatherData.icon = data.weather[0].icon;
+            // this.weatherData.temp = data.main.temp;
+            // this.weatherData.maxTemp = data.main.temp_max;
+            // this.weatherData.minTemp = data.main.temp_min;
+            // this.weatherData.humidity = data.main.humidity;
+            // this.weatherData.windSpeed = data.wind.speed;
+            // this.weatherData.rain = _.isEmpty(data.rain)
+                // ? 0
+                // : data.rain;
+            // this.weatherData.clouds = data.clouds.all;
+
+            // {
+            //     "coord": {
+            //         "lon":-49.06,
+            //         "lat":-22.33
+            //     },
+
+            //     "weather": [
+            //         {
+            //             "id":802,
+            //             "main":"Clouds",
+            //             "description":"scattered clouds",
+            //             "icon":"03n"
+            //         }
+            //     ],
+
+            //     "base":"stations",
+            //     "main": {
+            //         "temp":23.33,
+            //         "pressure":1017,
+            //         "humidity":75,
+            //         "temp_min":23.33,
+            //         "temp_max":23.33
+            //     },
+            //     "wind": {
+            //         "speed":3.58,
+            //         "deg":123,
+            //         "gust":6.26
+            //     },
+
+            //     "rain":{},
+            //     "clouds": {
+            //         "all":29 // % de nublado
+            //     },
+            //     "dt":1574212401,
+            //     "sys":{
+            //         "type":3,
+            //         "id":53165,
+            //         "country":"BR",
+            //         "sunrise":1574151874,
+            //         "sunset":1574199533
+            //     },
+            //     "timezone":-10800,
+            //     "id":3470279,
+            //     "name":"Bauru",
+            //     "cod":200
+            // }
         },
 
         getUserLocation () {
             navigator.geolocation.getCurrentPosition(position => {
-                this.userLocation.latitude = position.coords.latitude;
-                this.userLocation.longitude = position.coords.longitude;
-                // this.userLocation.altitude = position.coords.altitude;
-                // this.userLocation.accuracy = position.coords.accuracy;
-                // this.userLocation.altitudeAccuracy = position.coords.altitudeAccuracy;
-                // this.userLocation.heading = position.coords.height;
-                // this.userLocation.speed = position.coords.speed;
-                // this.userLocation.timestamp = position.timestamp;
+                let latitude = position.coords.latitude;
+                let longitude = position.coords.longitude;
 
-                console.log(this.userLocation.latitude, this.userLocation.longitude);
+                this.getWeather(latitude, longitude);
             });
         },
 
+        async searchUserAddress (address) {
+            let parsedAddress = address.replace('', '+');
+
+            let { data } = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${parsedAddress}&key=AIzaSyAEx2xbRdw-ecd6pXRFtXmCaeHukaNnM7E`);
+            console.log('searchUserAddress: ', data);
+        },
+
         search: _.throttle(function () {
-            //     this.isLoading = true;
-            //     this.isClearSearchActive = true;
-            //     this.isShowingInitialMessage = false;
 
-            // if (this.searchField.length > 4) {
-            //     this.isLoading = false;
-            //     this.getUser(this.searchField);
-
-            // } else {
-            //     this.isClearSearchActive = false;
-
-            // }
         }, 500),
 
         clearSearch () {
             // this.searchField = null;
         },
+
+        aroundTemperature (temperature) {
+            return Math.round(temperature);
+        },
     },
 
     mounted() {
         this.getUserLocation();
-        this.getWeather();
+        // this.getWeather();
     },
 };
 </script>

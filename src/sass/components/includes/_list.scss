@@ -1,94 +1,95 @@
-.weather_list {
+.content {
     @apply
         .flex
         .flex-wrap
         .h-full
         .p-3
-        .mb-3;
+        .mb-3
+        ;
 
-    &__title { @apply .mb-1; }
-
-    &__item,
-    &__repository {
-        @apply .w-full;
+    &__left,
+    &__right {
+        @apply
+            .border-2
+            .w-2/4
+            .p-4;
     }
 
-    &__item {
+    &__left {
         @apply
-            .flex;
+            .flex-grow-0
+            .border-r-2
+            .border-gray-500;
+    }
+    &__right {
+        @apply .flex-grow;
+    }
+}
 
-        &__image,
-        &__info {
-            @apply .w-1/2;
-        }
+.location {
+    @apply .mb-4;
 
-        &__image {
+    &_history {}
+}
+
+.weather {
+
+    &__title {
+        @apply
+            .mb-4
+            .font-bold;
+    }
+
+    &__box {
+        @apply
+            .border-2
+            .border-dashed
+            .border-gray-600
+            .rounded-sm
+            .p-4;
+
+        &-header {
             @apply
-                // .max-w-1/3
-                .mr-2;
-
-            img {
-                @apply .w-full;
-            }
+                .text-xl
+                .text-gray-500
+                .mb-3;
         }
 
-        &__info {
-            li {
-                @apply .my-2;
-            }
-        }
-
-        &__followers, &__following {
-            li {
-                @apply .ml-2;
-
-                a { @apply .underline; }
-            }
-        }
-    }
-
-    &__repository {
-        @apply
-            .p-3;
-
-        &__head {
+        &-body {
             @apply
                 .flex
-                .mb-1;
+                .mb-5;
 
-            h3 {
-                @apply .flex-grow;
+            &_left, &_right { @apply .w-2/4; }
+
+            &_left {
+                @apply
+                    .flex
+                    .items-center
+                    .text-4xl;
+
+            }
+
+            &_right {
+                @apply
+                    .text-gray-500;
             }
         }
 
+        &-next-days {}
+
+    }
         &__items {
+            @apply
+                .flex
+                .flex-row;
         }
 
         &__item {
             @apply
-                .flex
-                .my-1;
-
-            button {
-                @apply
-                    .flex-grow
-                    .text-left;
-            }
+                .text-center
+                .text-gray-500;
         }
-    }
-
-    &__repo-detail {
-        @apply
-            .p-3;
-
-        h3 {
-            @apply .mb-1;
-        }
-
-        li {
-            @apply .my-1;
-        }
-    }
 }
 
 .empty-message {
@@ -101,7 +102,7 @@
 }
 
 @screen md {
-    .weather_list {
+    .content {
         &__item,
         &__repository { @apply .w-1/2; }
 
