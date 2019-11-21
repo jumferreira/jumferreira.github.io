@@ -72,7 +72,6 @@
                                     <p v-text="searchedAddress"></p>
                                 </div>
 
-
                                 <div
                                     v-if="searchHistory.length"
                                     class="location_history"
@@ -231,9 +230,20 @@ export default {
 
                 this.weatherData.weather.push(weatherItem);
             });
+
+            if (localStorage.getItem('weatherData') && localStorage.getItem('weatherData') !== JSON.stringify(this.weatherData)) {
+                return;
+            }
+
+            localStorage.setItem('weatherData', JSON.stringify(this.weatherData));
         },
 
         async getWeather (latitude, longitude) {
+            if (localStorage.getItem('weatherData') && localStorage.getItem('currentAddress') === localStorage.getItem('lastSearched')) {
+                this.weatherData = JSON.parse(localStorage.getItem('weatherData'));
+                return;
+            }
+
             const { data } = await axios.get('https://api.openweathermap.org/data/2.5/forecast', {
                 params: {
                     lat: latitude,
@@ -278,6 +288,15 @@ export default {
         },
 
         async getAddressFromCoordenates (lat, lon) {
+            if (localStorage.getItem('currentAddress')) {
+                this.currentAddress = localStorage.getItem('currentAddress');
+                this.weatherData = JSON.parse(localStorage.getItem('weatherData'));
+
+                this.searchedAddress = localStorage.getItem('lastSearched');
+
+                return;
+            }
+
             const stringCoord = lat + ',' + lon;
             const { data } = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
                 params: {
@@ -290,6 +309,8 @@ export default {
             if (data.status === 'OK') {
                 this.currentAddress = data.results[0].formatted_address;
 
+                localStorage.setItem('currentAddress', this.currentAddress);
+
                 const latitude = data.results[0].geometry.location.lat;
                 const longitude = data.results[0].geometry.location.lng;
 
@@ -299,8 +320,10 @@ export default {
 
         search () {
             this.searchUserAddress(this.searchField);
-
             this.searchHistory.push(this.searchField);
+
+            localStorage.setItem('lastSearched', this.searchField);
+
             this.clearSearch();
         },
     },
