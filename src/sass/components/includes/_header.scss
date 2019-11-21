@@ -24,7 +24,7 @@
             .relative
             .justify-center;
 
-        input { align-self: center; }
+        input { @apply .self-center; }
 
         &-results {
             @apply
@@ -59,16 +59,13 @@
                     .cursor-pointer
                     .absolute
                     .p-2;
+
                 top: 5px;
             }
 
-            .fa-search {
-                right: 1%;
-            }
+            .fa-search { right: 1%; }
 
-            .fa-times {
-                right: 5%;
-            }
+            .fa-times { right: 7%; }
         }
     }
 }
@@ -79,13 +76,12 @@
 
 @screen md {
     .logo_column { @apply .column--2; }
-    .header__search-holder {
 
+    .header__search-holder {
+        .fa-times { right: 5%; }
     }
 }
 
-@screen lg {
-
-}
+@screen lg {}
 
 @screen xl {}

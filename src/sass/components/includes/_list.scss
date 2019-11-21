@@ -4,26 +4,18 @@
         .flex-wrap
         .h-full
         .p-3
-        .mb-3
-        ;
+        .mb-3;
 
     &__left,
     &__right {
         @apply
-            .border-2
-            .w-2/4
+            .w-full
             .p-4;
     }
 
-    &__left {
-        @apply
-            .flex-grow-0
-            .border-r-2
-            .border-gray-500;
-    }
-    &__right {
-        @apply .flex-grow;
-    }
+    &__left { @apply .flex-grow-0; }
+
+    &__right { @apply .flex-grow; }
 }
 
 .location {
@@ -33,7 +25,6 @@
 }
 
 .weather {
-
     &__title {
         @apply
             .mb-4
@@ -60,7 +51,12 @@
                 .flex
                 .mb-5;
 
-            &_left, &_right { @apply .w-2/4; }
+            &_left,
+            &_right {
+                @apply
+                    .w-2/4
+                    .justify-center;
+            }
 
             &_left {
                 @apply
@@ -70,50 +66,39 @@
 
             }
 
-            &_right {
-                @apply
-                    .text-gray-500;
-            }
+            &_right { @apply .text-gray-500; }
         }
 
         &-next-days {}
-
     }
-        &__items {
-            @apply
-                .flex
-                .flex-row;
-        }
 
-        &__item {
-            @apply
-                .text-center
-                .text-gray-500;
-        }
+    &__items {
+        @apply
+            .flex
+            .flex-row
+            .justify-between;
+    }
+
+    &__item {
+        @apply
+            .text-center
+            .text-gray-500;
+    }
 }
 
-.empty-message {
-    @apply
-        .w-3/4
-        .p-1
-        .border
-        .border-dashed
-        .my-0 .mx-auto;
-}
+@screen md {}
 
-@screen md {
+@screen lg {
     .content {
-        &__item,
-        &__repository { @apply .w-1/2; }
+        &__left,
+        &__right { @apply .w-2/4; }
 
-        &__item {
+        &__left {
             @apply
-                .border-r
-                .border-gray-600;
+                .border-r-2
+                .border-gray-500;
         }
     }
 }
-
-@screen lg {}
 
 @screen xl {}

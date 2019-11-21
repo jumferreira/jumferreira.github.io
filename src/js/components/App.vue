@@ -5,9 +5,9 @@
                 <div class="columns items-center">
                     <div class="column logo_column">
                         <h1 class="header__logo">
-                            <!-- <a href="https://site.blueticket.com.br/">
+                            <a href="https://site.blueticket.com.br/">
                                 <img class="header__image" src="https://images.assets-landingi.com/0Vj6dch8/logo-blueticket-color.png" alt="">
-                            </a> -->
+                            </a>
                         </h1>
                     </div>
 
@@ -53,10 +53,7 @@
 
         <div class="body">
             <div class="container">
-
-                <div class="loader" v-if="isLoading"></div>
-
-                <div class="columns" v-if="! isLoading">
+                <div class="columns">
                     <div class="column">
                         <div class="content">
                             <div class="content__left">
@@ -80,7 +77,7 @@
                                     v-if="searchHistory.length"
                                     class="location_history"
                                 >
-                                    Histórico de busca:
+                                    <strong>Histórico de busca:</strong>
 
                                     <ul>
                                         <li
@@ -89,7 +86,6 @@
                                             v-text="item"
                                         ></li>
                                     </ul>
-                                    <!-- colocar histórico em cache -->
                                 </div>
                             </div>
 
@@ -124,9 +120,9 @@
                                                 v-if="currentWeatherData"
                                                 class="weather__box-body_right"
                                             >
-                                                <p>Encoberto: {{ currentWeatherData.clouds }}%</p>
-                                                <p>Umidade: {{ currentWeatherData.humidity }}%</p>
-                                                <p>Vento: {{ currentWeatherData.windSpeed }}km/h</p>
+                                                <p v-text="'Encoberto: ' + currentWeatherData.clouds + '%'"></p>
+                                                <p v-text="'Umidade: ' + currentWeatherData.humidity + '%'"></p>
+                                                <p v-text="'Vento: ' + currentWeatherData.windSpeed + 'km/h'"></p>
                                             </div>
                                         </div>
 
@@ -170,7 +166,6 @@ export default {
             weather: [],
         },
 
-        isLoading: false,
         searchHistoryBar: false,
 
         searchField: null,
