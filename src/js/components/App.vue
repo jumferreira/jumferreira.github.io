@@ -5,9 +5,9 @@
                 <div class="columns items-center">
                     <div class="column logo_column">
                         <h1 class="header__logo">
-                            <!-- <a href="https://site.blueticket.com.br/">
+                            <a href="https://site.blueticket.com.br/">
                                 <img class="header__image" src="https://images.assets-landingi.com/0Vj6dch8/logo-blueticket-color.png" alt="">
-                            </a> -->
+                            </a>
                         </h1>
                     </div>
 
@@ -16,18 +16,35 @@
                             <div class="header__search-holder">
                                 <input
                                     type="text"
-                                    class="input input--grey-darker input--75"
+                                    class="input input--grey-darker input--full"
                                     placeholder="Busca por endereços"
                                     v-model="searchField"
-                                    @keyup="search()"
+                                    @keyup.enter="search()"
+                                    @click="searchHistoryBar = true"
                                 >
-
                                 <i
-                                    v-if="isClearSearchActive"
+                                    class="fas fa-search"
+                                    @click="search()"
+                                ></i>
+                                <i
+                                    v-if="searchHistoryBar"
                                     class="fas fa-times"
                                     @click="clearSearch()"
                                 ></i>
                             </div>
+
+                            <ul
+                                v-if="searchHistory.length && searchHistoryBar"
+                                class="header__search-results"
+                            >
+                                <li
+                                    class="header__search-result"
+                                    v-for="(item, index) in searchHistory"
+                                    :key="index"
+                                    v-text="item"
+                                    @click="searchUserAddress(item)"
+                                ></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -69,16 +86,25 @@
                                 <div class="location">
                                     <strong>Sua localização atual é:</strong>
                                     <p>Rua Raposo Tavares, 9-72 - Bauru - São Paulo</p>
-                                    <!-- colocar endereço -->
+                                    <br />
+                                    <strong v-if="searchedAddress">Último resultado obtido:</strong>
+                                    <p v-text="searchedAddress"></p>
                                 </div>
 
-                                <div class="location_history">
+                                <div
+                                    v-if="searchHistory.length"
+                                    class="location_history"
+                                >
                                     Histórico de busca:
 
                                     <ul>
-                                        <li>Rua Péricles Fechio, 54</li>
+                                        <li
+                                            v-for="(item, index) in searchHistory"
+                                            :key="index"
+                                            v-text="item"
+                                        ></li>
                                     </ul>
-                                    <!-- fazer v-for com histórico -->
+                                    <!-- colocar histórico em cache -->
                                 </div>
                             </div>
 
@@ -88,40 +114,43 @@
 
                                     <div class="weather__box">
                                         <div class="weather__box-header">
-                                            <p v-text="weatherData.cityName"></p>
-                                            <p v-text="weatherData.title"></p>
+                                            <p>{{ weatherData.city  + ' - ' + weatherData.country }}</p>
+                                            <p v-text="getCurrentTime"></p>
+                                            <p v-text="weatherData.weather[0].title"></p>
                                         </div>
 
                                         <div class="weather__box-body">
                                             <div class="weather__box-body_left">
-                                                <img :src="iconUrl" alt="weather">
+                                                <img v-lazy="iconUrl(weatherData.weather[0].icon)" alt="weather">
                                                 <p>
-                                                    {{ aroundTemperature(weatherData.temp) + '°C' }}
+                                                    {{ aroundTemperature(weatherData.weather[0].temp) + '°C' }}
                                                 </p>
                                             </div>
 
                                             <div class="weather__box-body_right">
-                                                <p>Chuva: {{ weatherData.rain }}%</p>
-                                                <p>Umidade: {{ weatherData.humidity }}%</p>
-                                                <p>Vento: {{ windSpeedParsed }}km/h</p>
+                                                <p>Chuva: {{ weatherData.weather[0].rain }}%</p>
+                                                <p>Umidade: {{ weatherData.weather[0].humidity }}%</p>
+                                                <p>Vento: {{ windSpeedParsed(weatherData.weather[0].windSpeed) }}km/h</p>
                                             </div>
                                         </div>
 
                                         <div class="weather__box-next-days">
                                             <ul class="weather__items">
-                                                <li class="weather__item">
-                                                    <p>dia</p>
-                                                    <p>icon</p>
-                                                    <p>max/min</p>
+                                                <li
+                                                    class="weather__item"
+                                                    v-for="(weather, index) in weatherData.weather"
+                                                    :key="index"
+                                                >
+                                                    <p>{{ getParsedDate(weather.dateTime) }}</p>
+                                                    <img v-lazy="iconUrl(weather.icon)" alt="">
+                                                    <p>{{ aroundTemperature(weather.temp) + '°C'}}</p>
                                                 </li>
                                             </ul>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -133,148 +162,175 @@
 
 export default {
     data: () => ({
-        // userLocation: {
-        //     latitude: 0,
-        //     longitude: 0,
-            // altitude: 0,
-            // accuracy: 0,
-            // altitudeAccuracy: 0,
-            // heading: 0,
-            // speed: 0,
-            // timestamp: 0,
-        // },
-
         weatherData: {
-            cityName:"Bauru",
-            clouds:0,
-            humidity:78,
-            icon:"01n",
-            maxTemp:22.22,
-            minTemp:22.22,
-            rain: 0,
-            temp:22.22,
-            title:"Clear",
-            windSpeed:4.47,
-
-
-            // title: null,
-            // temp: 0,
-            // maxTemp: 0,
-            // minTemp: 0,
-            // humidity: 0,
-            // windSpeed: 0,
-            // rain: 0,
-            // clouds: 0,
-            // cityName: null,
-            // icon: null,
+            city: null,
+            country: null,
+            weather: [],
         },
 
         isLoading: false,
+        searchHistoryBar: false,
+
         searchField: null,
-        isClearSearchActive: false,
         searchHistory: [],
+        searchedAddress: null,
     }),
 
     computed: {
-        iconUrl () {
-            return `https://openweathermap.org/img/wn/${this.weatherData.icon}@2x.png`;
+        getCurrentTime () {
+            let today = new Date();
+
+            return (today.getHours()-1) + ":" + today.getMinutes() + ":" + today.getSeconds();
         },
 
-        windSpeedParsed () {
-            return Math.round(this.weatherData.windSpeed * 3.6);
+        getCurrentDate () {
+            let today = new Date();
+            return today.getDate() + "-" + (today.getMonth()+1)  + "-" + today.getFullYear();
         },
     },
 
+
     methods: {
+        iconUrl (icon) {
+            return `https://openweathermap.org/img/wn/${icon}@2x.png`;
+        },
+
+        windSpeedParsed (windValue) {
+            return Math.round(windValue * 3.6);
+        },
+
+        getParsedDate (dateTime) {
+            let date = dateTime.split(' ')[0];
+            let finalDate = date.split('-');
+
+            return finalDate[2] + '-' + finalDate[1];
+        },
+
+        getClosestHour () {
+            let possibilities = ['00', '03', '06', '09', '12', '15', '18', '21'];
+
+            let today = new Date();
+
+            let currentHour = today.getHours()-1;
+
+            if (currentHour >= 22 && currentHour <= 24 || currentHour === -1) {
+                currentHour = '00';
+            }
+
+            console.log('getHours: ', currentHour);
+            if (possibilities.includes(currentHour.toString())) {
+                console.log('entrou 1');
+                return currentHour + ':00:00';
+            }
+
+            if (possibilities.includes((currentHour + 1).toString())) {
+                console.log('entrou 2');
+                return (currentHour + 1) + ':00:00';
+            }
+
+            if (possibilities.includes((currentHour + 2).toString())) {
+                console.log('entrou 3');
+                return (currentHour + 2) + ':00:00';
+            }
+        },
+
+        parseWeather (data) {
+            this.clearWeather();
+
+            this.weatherData.city = data.city.name;
+            this.weatherData.country = data.city.country;
+
+            let closestHour = this.getClosestHour();
+
+            let filteredList = _.filter(data.list, item => {
+                return item.dt_txt.includes(closestHour);
+            });
+
+            _.forEach(filteredList, item => {
+                let weatherItem = {
+                    clouds: item.clouds.all,
+                    humidity: item.main.humidity,
+                    temp: item.main.temp,
+                    tempMax: item.main.temp_max,
+                    tempMin: item.main.temp_min,
+                    dateTime: item.dt_txt,
+                    title: item.weather[0].main,
+                    icon: item.weather[0].icon,
+                    windSpeed: item.wind.speed,
+                };
+
+                this.weatherData.weather.push(weatherItem);
+            });
+
+        },
+
         async getWeather (latitude, longitude) {
 
             // certo
+            // tempo
             // let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=b077652524e83bc12498a0846b5f135d`);
 
-            // console.log('getWeather: ', data);
-            // this.weatherData.cityName = data.name;
-            // this.weatherData.title = data.weather[0].main;
-            // this.weatherData.icon = data.weather[0].icon;
-            // this.weatherData.temp = data.main.temp;
-            // this.weatherData.maxTemp = data.main.temp_max;
-            // this.weatherData.minTemp = data.main.temp_min;
-            // this.weatherData.humidity = data.main.humidity;
-            // this.weatherData.windSpeed = data.wind.speed;
-            // this.weatherData.rain = _.isEmpty(data.rain)
-                // ? 0
-                // : data.rain;
-            // this.weatherData.clouds = data.clouds.all;
+            // vários dias
+            let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=b077652524e83bc12498a0846b5f135d`);
 
-            // {
-            //     "coord": {
-            //         "lon":-49.06,
-            //         "lat":-22.33
-            //     },
 
-            //     "weather": [
-            //         {
-            //             "id":802,
-            //             "main":"Clouds",
-            //             "description":"scattered clouds",
-            //             "icon":"03n"
-            //         }
-            //     ],
-
-            //     "base":"stations",
-            //     "main": {
-            //         "temp":23.33,
-            //         "pressure":1017,
-            //         "humidity":75,
-            //         "temp_min":23.33,
-            //         "temp_max":23.33
-            //     },
-            //     "wind": {
-            //         "speed":3.58,
-            //         "deg":123,
-            //         "gust":6.26
-            //     },
-
-            //     "rain":{},
-            //     "clouds": {
-            //         "all":29 // % de nublado
-            //     },
-            //     "dt":1574212401,
-            //     "sys":{
-            //         "type":3,
-            //         "id":53165,
-            //         "country":"BR",
-            //         "sunrise":1574151874,
-            //         "sunset":1574199533
-            //     },
-            //     "timezone":-10800,
-            //     "id":3470279,
-            //     "name":"Bauru",
-            //     "cod":200
-            // }
+            this.parseWeather(data);
+            console.log('getWeather: ', data);
         },
 
         getUserLocation () {
-            navigator.geolocation.getCurrentPosition(position => {
-                let latitude = position.coords.latitude;
-                let longitude = position.coords.longitude;
+            if (! _.isEmpty(navigator.geolocation)) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    let latitude = position.coords.latitude;
+                    let longitude = position.coords.longitude;
 
-                this.getWeather(latitude, longitude);
-            });
+                    // TODO: ARRUMAR PRA QUANDO NÃO TEM LOCALIZAÇÃO
+                    //
+                    console.log('getUserLocation: ', position);
+
+                    this.getWeather(latitude, longitude);
+                });
+            }
+            console.log('getUserLocation ',  navigator.geolocation);
         },
 
         async searchUserAddress (address) {
-            let parsedAddress = address.replace('', '+');
-
+            if (_.isEmpty(address)) {
+                return;
+            }
+            let parsedAddress = address.split(' ').join('+');
+            // console.log('searchUserAddress ', parsedAddress);
             let { data } = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${parsedAddress}&key=AIzaSyAEx2xbRdw-ecd6pXRFtXmCaeHukaNnM7E`);
-            console.log('searchUserAddress: ', data);
+
+            if (data.status === 'OK') {
+                this.searchedAddress = data.results[0].formatted_address;
+
+                this.getWeather(data.results[0].geometry.location.lat, data.results[0].geometry.location.lng);
+
+            }
+            console.log('searchUserAddress: ', parsedAddress, data);
         },
 
-        search: _.throttle(function () {
+        search () {
+            console.log('search', this.searchField);
+            this.searchUserAddress(this.searchField);
 
-        }, 500),
+            this.searchHistory.push(this.searchField);
+            this.searchHistoryBar = false;
+            this.clearSearch();
+        },
 
         clearSearch () {
-            // this.searchField = null;
+            this.searchField = null;
+            this.searchHistoryBar = false;
+        },
+
+        clearWeather () {
+            this.weatherData.city = null;
+            this.weatherData.country = null;
+            this.weatherData.weather = [];
+
+            this.searchHistoryBar = false;
         },
 
         aroundTemperature (temperature) {

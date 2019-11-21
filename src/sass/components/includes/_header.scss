@@ -29,12 +29,13 @@
         &-results {
             @apply
                 .absolute
+                .w-3/4
                 .bg-white
                 .z-50
                 .border
                 .border-t-0;
 
-            width: 100%;
+            // width: 100%;
             top: 98%;
             list-style: none;
 
@@ -50,17 +51,24 @@
         &-holder {
            @apply
                .relative
-               .w-full
+               .w-3/4
                .text-center;
 
+            .fa-search,
             .fa-times {
                 @apply
                     .cursor-pointer
-                    .absolute;
+                    .absolute
+                    .p-2;
+                top: 5px;
+            }
 
-                top: 10px;
-                // right: 27%;
-                right: 15%;
+            .fa-search {
+                right: 1%;
+            }
+
+            .fa-times {
+                right: 5%;
             }
         }
     }
