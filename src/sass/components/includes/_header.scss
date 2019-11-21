@@ -35,7 +35,6 @@
                 .border
                 .border-t-0;
 
-            // width: 100%;
             top: 98%;
             list-style: none;
 
@@ -81,9 +80,7 @@
 @screen md {
     .logo_column { @apply .column--2; }
     .header__search-holder {
-        // @apply
-            // .w-3
-            // .text-left;
+
     }
 }
 

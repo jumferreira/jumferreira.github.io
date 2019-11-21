@@ -5,9 +5,9 @@
                 <div class="columns items-center">
                     <div class="column logo_column">
                         <h1 class="header__logo">
-                            <a href="https://site.blueticket.com.br/">
+                            <!-- <a href="https://site.blueticket.com.br/">
                                 <img class="header__image" src="https://images.assets-landingi.com/0Vj6dch8/logo-blueticket-color.png" alt="">
-                            </a>
+                            </a> -->
                         </h1>
                     </div>
 
@@ -58,38 +58,23 @@
 
                 <div class="columns" v-if="! isLoading">
                     <div class="column">
-                        <h2
-                            v-if="! isLoading"
-                            class="weather_list__title"
-                            v-text="'Check the weather next to you'"
-                        ></h2>
-
-                        <!-- <div class="empty-message" v-if="isShowingInitialMessage && isEmptyResult"> -->
-                        <!-- <div class="empty-message">
-                            <h3>Bem vindo ao painel de busca de endereços e tempo e temperatura <i class="fab fa-github"></i></h3>
-
-                            <p>Para usar o buscador é muito simples!</p>
-                            <br />
-
-                            <p>Você pode autorizar o navegador a usar sua localização ou então digitar seu endereço e a previsão do tempo já vai aparecer bem aqui. Viu como é simples?</p>
-                        </div> -->
-
-                        <!--
-                            TODO:
-                            - SALVAR HISTÓRICO DE BUSCA EM UM ARRAY
-                            - CRIAR BUSCA OTIMIZADA COM ESSE ARRAY
-                            - CACHEAR ESSES DADOS
-
-                        -->
                         <div class="content">
                             <div class="content__left">
-                                <div class="location">
-                                    <strong>Sua localização atual é:</strong>
-                                    <p>Rua Raposo Tavares, 9-72 - Bauru - São Paulo</p>
+                                <div class="location" >
+                                    <div v-if="currentAddress">
+                                        <strong>Sua localização atual é:</strong>
+                                        <p v-text="currentAddress"></p>
+                                    </div>
+
+                                    <div v-else>
+                                        <strong>Localização não fornecida</strong>
+                                    </div>
+
                                     <br />
                                     <strong v-if="searchedAddress">Último resultado obtido:</strong>
                                     <p v-text="searchedAddress"></p>
                                 </div>
+
 
                                 <div
                                     v-if="searchHistory.length"
@@ -112,25 +97,36 @@
                                 <div class="weather">
                                     <p class="weather__title">As informações do clima no momento:</p>
 
-                                    <div class="weather__box">
+                                    <div class="weather__box" v-if="weatherData.weather">
                                         <div class="weather__box-header">
-                                            <p>{{ weatherData.city  + ' - ' + weatherData.country }}</p>
+                                            <p v-text="cityName"></p>
                                             <p v-text="getCurrentTime"></p>
-                                            <p v-text="weatherData.weather[0].title"></p>
+                                            <p
+                                                v-if="currentWeatherData"
+                                                v-text="currentWeatherData.title"
+                                            ></p>
                                         </div>
 
                                         <div class="weather__box-body">
                                             <div class="weather__box-body_left">
-                                                <img v-lazy="iconUrl(weatherData.weather[0].icon)" alt="weather">
-                                                <p>
-                                                    {{ aroundTemperature(weatherData.weather[0].temp) + '°C' }}
-                                                </p>
+                                                <img
+                                                    v-if="currentWeatherData"
+                                                    v-lazy="currentWeatherData.icon"
+                                                    alt="weather"
+                                                >
+                                                <p
+                                                    v-if="currentWeatherData"
+                                                    v-text="currentWeatherData.temp + '°C'"
+                                                ></p>
                                             </div>
 
-                                            <div class="weather__box-body_right">
-                                                <p>Chuva: {{ weatherData.weather[0].rain }}%</p>
-                                                <p>Umidade: {{ weatherData.weather[0].humidity }}%</p>
-                                                <p>Vento: {{ windSpeedParsed(weatherData.weather[0].windSpeed) }}km/h</p>
+                                            <div
+                                                v-if="currentWeatherData"
+                                                class="weather__box-body_right"
+                                            >
+                                                <p>Encoberto: {{ currentWeatherData.clouds }}%</p>
+                                                <p>Umidade: {{ currentWeatherData.humidity }}%</p>
+                                                <p>Vento: {{ currentWeatherData.windSpeed }}km/h</p>
                                             </div>
                                         </div>
 
@@ -141,9 +137,9 @@
                                                     v-for="(weather, index) in weatherData.weather"
                                                     :key="index"
                                                 >
-                                                    <p>{{ getParsedDate(weather.dateTime) }}</p>
-                                                    <img v-lazy="iconUrl(weather.icon)" alt="">
-                                                    <p>{{ aroundTemperature(weather.temp) + '°C'}}</p>
+                                                    <p v-text="weather.dateTime"></p>
+                                                    <img v-lazy="weather.icon" alt="">
+                                                    <p v-text="currentWeatherData.temp + '°C'"></p>
                                                 </li>
                                             </ul>
                                         </div>
@@ -159,8 +155,14 @@
 </template>
 
 <script>
+import moment from 'moment';
+import weather from '../utils/weather';
 
 export default {
+    mixins: [
+        weather,
+    ],
+
     data: () => ({
         weatherData: {
             city: null,
@@ -174,64 +176,41 @@ export default {
         searchField: null,
         searchHistory: [],
         searchedAddress: null,
+        currentAddress: null,
     }),
 
     computed: {
         getCurrentTime () {
-            let today = new Date();
-
-            return (today.getHours()-1) + ":" + today.getMinutes() + ":" + today.getSeconds();
+            return moment().format('HH:mm:ss');
         },
 
         getCurrentDate () {
-            let today = new Date();
-            return today.getDate() + "-" + (today.getMonth()+1)  + "-" + today.getFullYear();
+            return moment().format('DD-MM-YYYY');
         },
+
+        cityName () {
+            if (this.weatherData.city && this.weatherData.country) {
+                return this.weatherData.city  + ' - ' + this.weatherData.country;
+            }
+
+            return '';
+        },
+
+        currentWeatherData() {
+            if (this.weatherData.weather) {
+                return this.weatherData.weather[0];
+            }
+        }
     },
 
-
     methods: {
-        iconUrl (icon) {
-            return `https://openweathermap.org/img/wn/${icon}@2x.png`;
-        },
-
-        windSpeedParsed (windValue) {
-            return Math.round(windValue * 3.6);
-        },
-
-        getParsedDate (dateTime) {
-            let date = dateTime.split(' ')[0];
-            let finalDate = date.split('-');
-
-            return finalDate[2] + '-' + finalDate[1];
-        },
-
         getClosestHour () {
-            let possibilities = ['00', '03', '06', '09', '12', '15', '18', '21'];
+            const hourRangesFromApi = [0, 3, 6, 9, 12, 15, 18, 21];
+            const hour = moment().hour();
 
-            let today = new Date();
-
-            let currentHour = today.getHours()-1;
-
-            if (currentHour >= 22 && currentHour <= 24 || currentHour === -1) {
-                currentHour = '00';
-            }
-
-            console.log('getHours: ', currentHour);
-            if (possibilities.includes(currentHour.toString())) {
-                console.log('entrou 1');
-                return currentHour + ':00:00';
-            }
-
-            if (possibilities.includes((currentHour + 1).toString())) {
-                console.log('entrou 2');
-                return (currentHour + 1) + ':00:00';
-            }
-
-            if (possibilities.includes((currentHour + 2).toString())) {
-                console.log('entrou 3');
-                return (currentHour + 2) + ':00:00';
-            }
+            return hourRangesFromApi.reduce(function(previous, current) {
+                return (Math.abs(current - hour) < Math.abs(previous - hour) ? current : previous);
+            });
         },
 
         parseWeather (data) {
@@ -240,107 +219,99 @@ export default {
             this.weatherData.city = data.city.name;
             this.weatherData.country = data.city.country;
 
-            let closestHour = this.getClosestHour();
-
-            let filteredList = _.filter(data.list, item => {
-                return item.dt_txt.includes(closestHour);
+            const filteredList = _.filter(data.list, item => {
+                return moment(item.dt_txt).hour() === this.getClosestHour();
             });
 
             _.forEach(filteredList, item => {
-                let weatherItem = {
+                const weatherItem = {
                     clouds: item.clouds.all,
                     humidity: item.main.humidity,
-                    temp: item.main.temp,
-                    tempMax: item.main.temp_max,
-                    tempMin: item.main.temp_min,
-                    dateTime: item.dt_txt,
+                    temp: this.aroundTemperature(item.main.temp),
+                    dateTime: this.getParsedDate(item.dt_txt),
                     title: item.weather[0].main,
-                    icon: item.weather[0].icon,
-                    windSpeed: item.wind.speed,
+                    icon: this.iconUrl(item.weather[0].icon),
+                    windSpeed: this.windSpeedParsed(item.wind.speed),
                 };
 
                 this.weatherData.weather.push(weatherItem);
             });
-
         },
 
         async getWeather (latitude, longitude) {
-
-            // certo
-            // tempo
-            // let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=b077652524e83bc12498a0846b5f135d`);
-
-            // vários dias
-            let { data } = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=b077652524e83bc12498a0846b5f135d`);
-
+            const { data } = await axios.get('https://api.openweathermap.org/data/2.5/forecast', {
+                params: {
+                    lat: latitude,
+                    lon: longitude,
+                    units: 'metric',
+                    appid: 'b077652524e83bc12498a0846b5f135d',
+                }
+            });
 
             this.parseWeather(data);
-            console.log('getWeather: ', data);
         },
 
         getUserLocation () {
-            if (! _.isEmpty(navigator.geolocation)) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
+            navigator.geolocation.getCurrentPosition(position => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
 
-                    // TODO: ARRUMAR PRA QUANDO NÃO TEM LOCALIZAÇÃO
-                    //
-                    console.log('getUserLocation: ', position);
-
-                    this.getWeather(latitude, longitude);
-                });
-            }
-            console.log('getUserLocation ',  navigator.geolocation);
+                this.getAddressFromCoordenates(latitude, longitude);
+            });
         },
 
         async searchUserAddress (address) {
             if (_.isEmpty(address)) {
                 return;
             }
-            let parsedAddress = address.split(' ').join('+');
-            // console.log('searchUserAddress ', parsedAddress);
-            let { data } = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${parsedAddress}&key=AIzaSyAEx2xbRdw-ecd6pXRFtXmCaeHukaNnM7E`);
+
+            const parsedAddress = address.split(' ').join('+');
+            const { data } = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+                params: {
+                    address: parsedAddress,
+                    key: 'AIzaSyAEx2xbRdw-ecd6pXRFtXmCaeHukaNnM7E',
+                }
+            });
 
             if (data.status === 'OK') {
                 this.searchedAddress = data.results[0].formatted_address;
+                const latitude = data.results[0].geometry.location.lat;
+                const longitude = data.results[0].geometry.location.lng;
 
-                this.getWeather(data.results[0].geometry.location.lat, data.results[0].geometry.location.lng);
-
+                this.getWeather(latitude, longitude);
             }
-            console.log('searchUserAddress: ', parsedAddress, data);
+        },
+
+        async getAddressFromCoordenates (lat, lon) {
+            const stringCoord = lat + ',' + lon;
+            const { data } = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+                params: {
+                    latlng: stringCoord,
+                    result_type: 'street_address',
+                    key: 'AIzaSyAEx2xbRdw-ecd6pXRFtXmCaeHukaNnM7E',
+                }
+            });
+
+            if (data.status === 'OK') {
+                this.currentAddress = data.results[0].formatted_address;
+
+                const latitude = data.results[0].geometry.location.lat;
+                const longitude = data.results[0].geometry.location.lng;
+
+                this.getWeather(latitude, longitude);
+            }
         },
 
         search () {
-            console.log('search', this.searchField);
             this.searchUserAddress(this.searchField);
 
             this.searchHistory.push(this.searchField);
-            this.searchHistoryBar = false;
             this.clearSearch();
-        },
-
-        clearSearch () {
-            this.searchField = null;
-            this.searchHistoryBar = false;
-        },
-
-        clearWeather () {
-            this.weatherData.city = null;
-            this.weatherData.country = null;
-            this.weatherData.weather = [];
-
-            this.searchHistoryBar = false;
-        },
-
-        aroundTemperature (temperature) {
-            return Math.round(temperature);
         },
     },
 
     mounted() {
         this.getUserLocation();
-        // this.getWeather();
     },
 };
 </script>
