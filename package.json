@@ -9,13 +9,14 @@
     "prod": "NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "build": "yarn prod",
     "start": "serve ./dist --single",
-    "deploy": "yarn prod"
+    "deploy": "yarn prod; push-dir --dir=dist --branch=gh-pages --cleanup"
   },
   "devDependencies": {
     "axios": "^0.19.0",
     "html-webpack-plugin": "^3.2.0",
     "laravel-mix": "^5.0.0",
     "lodash": "^4.17.15",
+    "push-dir": "^0.4.1",
     "sass": "^1.23.6",
     "sass-loader": "^8.0.0",
     "tailwindcss": "^1.1.3",
