@@ -2,7 +2,7 @@
 
 ### Installation of the code
 
-1- Git clone from the `master` branch
+1- Git clone from the `source` branch
 
 2- In the page of the application, using Yarn
 
