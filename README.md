@@ -1,5 +1,8 @@
 # Weather API
 
+Fun way to play with a weather API, browser location, LocalStorage and VueJs.
+
+
 ### Installation of the code
 
 1- Git clone
