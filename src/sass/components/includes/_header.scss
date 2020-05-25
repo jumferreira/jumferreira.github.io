@@ -7,15 +7,18 @@
 
     &__logo {
         @apply
-            .w-full
+            .h-full
             .my-0 .mx-auto;
 
-        max-width: 180px;
+        max-height: 80px;
 
         a { @apply .block; }
     }
 
-    &__image { @apply .mr-1; }
+    &__image {
+        @apply .mr-1;
+        max-height: 80px;
+    }
 
     &__search {
         @apply

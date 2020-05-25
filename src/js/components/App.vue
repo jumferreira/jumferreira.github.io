@@ -5,8 +5,8 @@
                 <div class="columns items-center">
                     <div class="column logo_column">
                         <h1 class="header__logo">
-                            <a href="https://site.blueticket.com.br/">
-                                <img class="header__image" src="https://images.assets-landingi.com/0Vj6dch8/logo-blueticket-color.png" alt="">
+                            <a href="#">
+                                <img class="header__image" src="https://lh3.googleusercontent.com/proxy/slkNhtOYDf2v0eJ5smfQQjY3NlxfB_ddME10-uzuei8u9SVY_K9OKx37RQzPvCEaxICTq7vkCcQwoZFvPbUcIU9Oqgt7U55d4QmiEHwdPA6DHwh_yeV_ZKM" alt="">
                             </a>
                         </h1>
                     </div>
