@@ -15,5 +15,3 @@ Vue.component('app', App);
 new Vue({
     el: '#app',
 });
-
-
